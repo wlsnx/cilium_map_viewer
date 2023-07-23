@@ -35,7 +35,20 @@ pub fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> Result<(
 }
 
 lazy_static! {
-    static ref MAP_FILTER: Regex = Regex::new("cilium_(policy_|tunnel_m|ct4_glob|metrics|ct_any4_|lb4_reve|lb4_serv|lb4_back|lb_affin|snat_v4_|ipcache)").unwrap();
+    static ref MAP_FILTER: Regex = Regex::new(
+        "cilium_(policy_\
+                |tunnel_m\
+                |ct4_glob\
+                |metrics\
+                |ct_any4_\
+                |lb4_reve\
+                |lb4_serv\
+                |lb4_back\
+                |lb_affin\
+                |snat_v4_\
+                |ipcache)"
+    )
+    .unwrap();
 }
 
 fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
