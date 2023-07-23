@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::{ip::IpFamily, Ip, Ipv4, Ipv6, L4Proto, Mac};
+use crate::{ip::IpFamily, Ip, Ipv4, Ipv6, L4Proto, Mac, MetricsDir, MetricsReason, Port};
 use bitflags::bitflags;
 use plain::Plain;
 use tuitable_derive::TuiTable;
@@ -10,9 +10,9 @@ use tuitable_derive::TuiTable;
 pub struct PolicyKey {
     // len: u32,
     sec_label: u32,
-    dport: u16,
+    dport: Port,
     protocol: L4Proto,
-    egress: u8,
+    egress: bool,
 }
 
 unsafe impl Plain for PolicyKey {}
@@ -35,7 +35,7 @@ impl fmt::Display for PolicyEntryFlags {
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct PolicyEntry {
-    proxy_port: u16,
+    proxy_port: Port,
     flags: PolicyEntryFlags,
     auth_type: u8,
     pad1: u16,
@@ -140,8 +140,8 @@ unsafe impl Plain for AuthInfo {}
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct MetricsKey {
-    reason: u8,
-    dir: u8,
+    reason: MetricsReason,
+    dir: MetricsDir,
 }
 
 unsafe impl Plain for MetricsKey {}
@@ -255,11 +255,12 @@ unsafe impl Plain for EncryptConfig {}
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct Ipv6CtTuple {
+    // saddr 和 daddr 是反的
     daddr: Ipv6,
     saddr: Ipv6,
-    dport: u16,
-    sport: u16,
-    nexthdr: u8,
+    dport: Port,
+    sport: Port,
+    nexthdr: L4Proto,
     flags: u8,
 }
 
@@ -268,11 +269,12 @@ unsafe impl Plain for Ipv6CtTuple {}
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct Ipv4CtTuple {
+    // saddr 和 daddr 是反的
     daddr: Ipv4,
     saddr: Ipv4,
-    dport: u16,
-    sport: u16,
-    nexthdr: u8,
+    dport: Port,
+    sport: Port,
+    nexthdr: L4Proto,
     flags: u8,
 }
 
@@ -342,7 +344,7 @@ unsafe impl Plain for CtEntry {}
 #[derive(Default, TuiTable)]
 pub struct Lb6Key {
     address: Ipv6,
-    dport: u16,
+    dport: Port,
     backend_slot: u16,
     proto: L4Proto,
     scope: u8,
@@ -402,7 +404,7 @@ unsafe impl Plain for Lb6Service {}
 #[derive(Default, TuiTable)]
 pub struct Lb6Backend {
     address: Ipv6,
-    port: u16,
+    port: Port,
     proto: L4Proto,
     flags: u8,
     cluster_id: u8,
@@ -414,7 +416,7 @@ unsafe impl Plain for Lb6Backend {}
 #[derive(Default, TuiTable)]
 pub struct Lb6ReverseNat {
     address: Ipv6,
-    port: u16,
+    port: Port,
 }
 
 unsafe impl Plain for Lb6ReverseNat {}
@@ -424,7 +426,7 @@ unsafe impl Plain for Lb6ReverseNat {}
 pub struct Ipv6RevnatTuple {
     cookie: u64,
     address: Ipv6,
-    port: u16,
+    port: Port,
 }
 
 unsafe impl Plain for Ipv6RevnatTuple {}
@@ -433,7 +435,7 @@ unsafe impl Plain for Ipv6RevnatTuple {}
 #[derive(Default, TuiTable)]
 pub struct Ipv6RevnatEntry {
     address: Ipv6,
-    port: u16,
+    port: Port,
     rev_nat_index: u16,
 }
 
@@ -443,7 +445,7 @@ unsafe impl Plain for Ipv6RevnatEntry {}
 #[derive(Default, TuiTable)]
 pub struct Lb4Key {
     address: Ipv4,
-    dport: u16,
+    dport: Port,
     backend_slot: u16,
     proto: L4Proto,
     scope: u8,
@@ -465,9 +467,17 @@ unsafe impl Plain for Lb4Service {}
 
 #[repr(C)]
 #[derive(Default, TuiTable)]
+pub struct Lb4BackendKey {
+    backend_id: u32,
+}
+
+unsafe impl Plain for Lb4BackendKey {}
+
+#[repr(C)]
+#[derive(Default, TuiTable)]
 pub struct Lb4Backend {
     address: Ipv4,
-    port: u16,
+    port: Port,
     proto: L4Proto,
     flags: u8,
     cluster_id: u8,
@@ -477,9 +487,17 @@ unsafe impl Plain for Lb4Backend {}
 
 #[repr(C)]
 #[derive(Default, TuiTable)]
+pub struct Lb4ReverseNatKey {
+    rev_nat_index: u16,
+}
+
+unsafe impl Plain for Lb4ReverseNatKey {}
+
+#[repr(C)]
+#[derive(Default, TuiTable)]
 pub struct Lb4ReverseNat {
     address: Ipv4,
-    port: u16,
+    port: Port,
 }
 
 unsafe impl Plain for Lb4ReverseNat {}
@@ -489,7 +507,7 @@ unsafe impl Plain for Lb4ReverseNat {}
 pub struct Ipv4RevnatTuple {
     cookie: u64,
     address: Ipv4,
-    port: u16,
+    port: Port,
 }
 
 unsafe impl Plain for Ipv4RevnatTuple {}
@@ -498,7 +516,7 @@ unsafe impl Plain for Ipv4RevnatTuple {}
 #[derive(Default, TuiTable)]
 pub struct Ipv4RevnatEntry {
     address: Ipv4,
-    port: u16,
+    port: Port,
     rev_nat_index: u16,
 }
 
@@ -550,7 +568,7 @@ pub struct Ipv4NatEntry {
     pad1: u64,
     pad2: u64,
     to_addr: Ipv4,
-    to_port: u16,
+    to_port: Port,
 }
 
 unsafe impl Plain for Ipv4NatEntry {}

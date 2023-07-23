@@ -11,9 +11,15 @@ mod l4proto;
 pub use l4proto::L4Proto;
 
 mod table;
-pub use table::table;
+pub use table::{run_app, App};
 mod types;
 pub use types::*;
 
 mod maps;
 pub use maps::dump;
+
+mod port;
+pub use port::Port;
+
+mod metrics;
+pub use metrics::{MetricsDir, MetricsReason};
