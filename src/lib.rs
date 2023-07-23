@@ -15,8 +15,8 @@ pub use table::{run_app, App};
 mod types;
 pub use types::*;
 
-mod maps;
-pub use maps::dump;
+mod map;
+pub use map::dump;
 
 mod port;
 pub use port::Port;

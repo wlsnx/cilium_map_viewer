@@ -82,11 +82,15 @@ unsafe impl Plain for TunnelValue {}
 #[derive(Default, TuiTable)]
 pub struct EndpointInfo {
     ifindex: u32,
-    unused: u16,
+    pad: u16,
     lxc_id: u16,
     flags: u32,
+    pad2: u32,
     mac: Mac,
+    pad3: u16,
     node_mac: Mac,
+    pad4: u16,
+    sec_id: u32,
 }
 
 unsafe impl Plain for EndpointInfo {}

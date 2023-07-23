@@ -46,6 +46,7 @@ lazy_static! {
                 |lb4_back\
                 |lb_affin\
                 |snat_v4_\
+                |lxc\
                 |ipcache)"
     )
     .unwrap();
@@ -201,6 +202,7 @@ impl App {
             "cilium_lb_affin" => dump::<Lb4AffinityKey, LbAffinityVal>(&map, false)?,
             "cilium_snat_v4_" => dump::<Ipv4CtTuple, Ipv4NatEntry>(&map, false)?,
             "cilium_lb4_back" => dump::<Lb4BackendKey, Lb4Backend>(&map, false)?,
+            "cilium_lxc" => dump::<EndpointKey, EndpointInfo>(&map, false)?,
             _ => {
                 self.rows.clear();
                 self.header.clear();
