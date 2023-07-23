@@ -55,7 +55,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     let name_len = app
         .maps
         .iter()
-        .map(|(name, _)| name.len())
+        .map(|(name, _)| name.len() - 7)
         .max()
         .unwrap_or(0);
     let rects = Layout::default()
@@ -103,7 +103,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     let map_names: Vec<_> = app
         .maps
         .iter()
-        .map(|map| ListItem::new(map.0.clone()))
+        .map(|map| ListItem::new(&map.0[7..]))
         .collect();
     let maps = List::new(map_names)
         .block(
