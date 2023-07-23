@@ -97,7 +97,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
             app.rows.len()
         )))
         .widths(&widths)
-        .column_spacing(1)
+        .column_spacing(2)
         .highlight_style(selected_style);
     f.render_stateful_widget(t, rects[1], &mut app.content_state);
 

@@ -15,6 +15,7 @@ fn main() -> Result<()> {
     let mut terminal = Terminal::new(backend)?;
     let app = App::default();
     let res = run_app(&mut terminal, app);
+    // FIXME: 使用 Drop 保证意外退出时也能恢复终端
     disable_raw_mode()?;
     execute!(
         terminal.backend_mut(),
