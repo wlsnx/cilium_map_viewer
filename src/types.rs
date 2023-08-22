@@ -8,11 +8,11 @@ use tuitable_derive::TuiTable;
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct PolicyKey {
-    // len: u32,
+    len: u32,
     sec_label: u32,
-    dport: Port,
-    protocol: L4Proto,
     egress: bool,
+    protocol: L4Proto,
+    dport: Port,
 }
 
 unsafe impl Plain for PolicyKey {}
