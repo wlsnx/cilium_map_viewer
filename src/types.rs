@@ -8,7 +8,7 @@ use tuitable_derive::TuiTable;
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct PolicyKey {
-    len: u32,
+    pad0: u32,
     sec_label: u32,
     egress: bool,
     protocol: L4Proto,
