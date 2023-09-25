@@ -52,6 +52,7 @@ pub fn table_derive(input: TokenStream) -> TokenStream {
                 ]
             }
         }
+        unsafe impl ::plain::Plain for #name {}
     );
     output.into()
 }

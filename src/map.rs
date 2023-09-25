@@ -28,7 +28,9 @@ where
         let mut values = if percpu {
             map.lookup_percpu(&key, MapFlags::empty())?.unwrap()
         } else {
-            vec![map.lookup(&key, MapFlags::empty())?.unwrap()]
+            vec![map
+                .lookup(&key[..map.key_size() as usize], MapFlags::empty())?
+                .unwrap()]
         };
         for (cpu, value) in values.iter_mut().enumerate() {
             let mut row = vec![];

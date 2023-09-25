@@ -2,7 +2,6 @@ use std::fmt;
 
 use crate::{ip::IpFamily, Ip, Ipv4, Ipv6, L4Proto, Mac, MetricsDir, MetricsReason, Port};
 use bitflags::bitflags;
-use plain::Plain;
 use tuitable_derive::TuiTable;
 
 #[repr(C)]
@@ -14,8 +13,6 @@ pub struct PolicyKey {
     protocol: L4Proto,
     dport: Port,
 }
-
-unsafe impl Plain for PolicyKey {}
 
 bitflags! {
     #[derive(Default)]
@@ -44,8 +41,6 @@ pub struct PolicyEntry {
     bytes: u64,
 }
 
-unsafe impl Plain for PolicyEntry {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct EndpointKey {
@@ -55,8 +50,6 @@ pub struct EndpointKey {
     cluster_id: u8,
 }
 
-unsafe impl Plain for EndpointKey {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct TunnelKey {
@@ -64,8 +57,6 @@ pub struct TunnelKey {
     family: IpFamily,
     cluster_id: u8,
 }
-
-unsafe impl Plain for TunnelKey {}
 
 #[repr(C)]
 #[derive(Default, TuiTable)]
@@ -75,8 +66,6 @@ pub struct TunnelValue {
     key: u8,
     node_id: u16,
 }
-
-unsafe impl Plain for TunnelValue {}
 
 #[repr(C)]
 #[derive(Default, TuiTable)]
@@ -93,15 +82,11 @@ pub struct EndpointInfo {
     sec_id: u32,
 }
 
-unsafe impl Plain for EndpointInfo {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct EdtId {
     id: u64,
 }
-
-unsafe impl Plain for EdtId {}
 
 #[repr(C)]
 #[derive(Default, TuiTable)]
@@ -120,8 +105,6 @@ pub struct RemoteEndpointInfo {
     key: u8,
 }
 
-unsafe impl Plain for RemoteEndpointInfo {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct AuthKey {
@@ -131,15 +114,11 @@ pub struct AuthKey {
     auth_type: u8,
 }
 
-unsafe impl Plain for AuthKey {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct AuthInfo {
     expiration: u64,
 }
-
-unsafe impl Plain for AuthInfo {}
 
 #[repr(C)]
 #[derive(Default, TuiTable)]
@@ -148,16 +127,12 @@ pub struct MetricsKey {
     dir: MetricsDir,
 }
 
-unsafe impl Plain for MetricsKey {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct MetricsValue {
     count: u64,
     bytes: u64,
 }
-
-unsafe impl Plain for MetricsValue {}
 
 #[repr(C)]
 #[derive(Default, TuiTable)]
@@ -166,16 +141,12 @@ pub struct EgressGwPolicyKey {
     daddr: Ipv4,
 }
 
-unsafe impl Plain for EgressGwPolicyKey {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct EgressGwPolicyEntry {
     egress_ip: Ipv4,
     gateway_ip: Ipv4,
 }
-
-unsafe impl Plain for EgressGwPolicyEntry {}
 
 #[repr(C)]
 #[derive(Default, TuiTable)]
@@ -184,16 +155,12 @@ pub struct Srv6VrfKey4 {
     dst_cidr: Ipv4,
 }
 
-unsafe impl Plain for Srv6VrfKey4 {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct Srv6VrfKey6 {
     src_ip: Ipv6,
     dst_cidr: Ipv6,
 }
-
-unsafe impl Plain for Srv6VrfKey6 {}
 
 #[repr(C)]
 #[derive(Default, TuiTable)]
@@ -202,16 +169,12 @@ pub struct Srv6PolicyKey4 {
     dst_cidr: Ipv4,
 }
 
-unsafe impl Plain for Srv6PolicyKey4 {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct Srv6PolicyKey6 {
     vrf_id: u32,
     dst_cidr: Ipv6,
 }
-
-unsafe impl Plain for Srv6PolicyKey6 {}
 
 #[repr(C)]
 #[derive(Default, TuiTable)]
@@ -220,8 +183,6 @@ pub struct Srv6Ipv4_2tuple {
     dst: Ipv4,
 }
 
-unsafe impl Plain for Srv6Ipv4_2tuple {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct Srv6Ipv6_2tuple {
@@ -229,15 +190,11 @@ pub struct Srv6Ipv6_2tuple {
     dst: Ipv6,
 }
 
-unsafe impl Plain for Srv6Ipv6_2tuple {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct VtepKey {
     vtep_ip: Ipv4,
 }
-
-unsafe impl Plain for VtepKey {}
 
 #[repr(C)]
 #[derive(Default, TuiTable)]
@@ -246,15 +203,11 @@ pub struct VtepValue {
     tunnel_endpoint: u32,
 }
 
-unsafe impl Plain for VtepValue {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct EncryptConfig {
     encrypt_key: u8,
 }
-
-unsafe impl Plain for EncryptConfig {}
 
 #[repr(C)]
 #[derive(Default, TuiTable)]
@@ -268,8 +221,6 @@ pub struct Ipv6CtTuple {
     flags: u8,
 }
 
-unsafe impl Plain for Ipv6CtTuple {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct Ipv4CtTuple {
@@ -281,8 +232,6 @@ pub struct Ipv4CtTuple {
     nexthdr: L4Proto,
     flags: u8,
 }
-
-unsafe impl Plain for Ipv4CtTuple {}
 
 bitflags! {
     #[derive(Default)]
@@ -342,8 +291,6 @@ pub struct CtEntry {
     last_rx_report: u32,
 }
 
-unsafe impl Plain for CtEntry {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct Lb6Key {
@@ -353,8 +300,6 @@ pub struct Lb6Key {
     proto: L4Proto,
     scope: u8,
 }
-
-unsafe impl Plain for Lb6Key {}
 
 bitflags! {
     #[derive(Default)]
@@ -402,8 +347,6 @@ pub struct Lb6Service {
     flags2: ServiceFlags2,
 }
 
-unsafe impl Plain for Lb6Service {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct Lb6Backend {
@@ -414,16 +357,12 @@ pub struct Lb6Backend {
     cluster_id: u8,
 }
 
-unsafe impl Plain for Lb6Backend {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct Lb6ReverseNat {
     address: Ipv6,
     port: Port,
 }
-
-unsafe impl Plain for Lb6ReverseNat {}
 
 #[repr(C)]
 #[derive(Default, TuiTable)]
@@ -433,8 +372,6 @@ pub struct Ipv6RevnatTuple {
     port: Port,
 }
 
-unsafe impl Plain for Ipv6RevnatTuple {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct Ipv6RevnatEntry {
@@ -442,8 +379,6 @@ pub struct Ipv6RevnatEntry {
     port: Port,
     rev_nat_index: u16,
 }
-
-unsafe impl Plain for Ipv6RevnatEntry {}
 
 #[repr(C)]
 #[derive(Default, TuiTable)]
@@ -455,8 +390,6 @@ pub struct Lb4Key {
     scope: u8,
 }
 
-unsafe impl Plain for Lb4Key {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct Lb4Service {
@@ -467,15 +400,11 @@ pub struct Lb4Service {
     flags2: ServiceFlags2,
 }
 
-unsafe impl Plain for Lb4Service {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct Lb4BackendKey {
     backend_id: u32,
 }
-
-unsafe impl Plain for Lb4BackendKey {}
 
 #[repr(C)]
 #[derive(Default, TuiTable)]
@@ -487,15 +416,11 @@ pub struct Lb4Backend {
     cluster_id: u8,
 }
 
-unsafe impl Plain for Lb4Backend {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct Lb4ReverseNatKey {
     rev_nat_index: u16,
 }
-
-unsafe impl Plain for Lb4ReverseNatKey {}
 
 #[repr(C)]
 #[derive(Default, TuiTable)]
@@ -503,8 +428,6 @@ pub struct Lb4ReverseNat {
     address: Ipv4,
     port: Port,
 }
-
-unsafe impl Plain for Lb4ReverseNat {}
 
 #[repr(C)]
 #[derive(Default, TuiTable)]
@@ -514,8 +437,6 @@ pub struct Ipv4RevnatTuple {
     port: Port,
 }
 
-unsafe impl Plain for Ipv4RevnatTuple {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct Ipv4RevnatEntry {
@@ -523,28 +444,6 @@ pub struct Ipv4RevnatEntry {
     port: Port,
     rev_nat_index: u16,
 }
-
-unsafe impl Plain for Ipv4RevnatEntry {}
-
-#[repr(C)]
-#[derive(Default, TuiTable)]
-pub struct Lb4AffinityKey {
-    client_ip: Ipv4,
-    client_cookie: u64,
-    rev_nat_id: u16,
-    netns_cookie: u8,
-}
-
-unsafe impl Plain for Lb4AffinityKey {}
-
-#[repr(C)]
-#[derive(Default, TuiTable)]
-pub struct LbAffinityVal {
-    last_used: u64,
-    backend_id: u32,
-}
-
-unsafe impl Plain for LbAffinityVal {}
 
 #[repr(C)]
 #[derive(Default, TuiTable)]
@@ -554,15 +453,11 @@ pub struct Lb4SrcRangeKey {
     addr: Ipv4,
 }
 
-unsafe impl Plain for Lb4SrcRangeKey {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct LpmV4Key {
     addr: Ipv4,
 }
-
-unsafe impl Plain for LpmV4Key {}
 
 #[repr(C)]
 #[derive(Default, TuiTable)]
@@ -575,8 +470,6 @@ pub struct Ipv4NatEntry {
     to_port: Port,
 }
 
-unsafe impl Plain for Ipv4NatEntry {}
-
 #[repr(C)]
 #[derive(Default, TuiTable)]
 pub struct IpcacheKey {
@@ -586,5 +479,3 @@ pub struct IpcacheKey {
     family: IpFamily,
     addr: Ip,
 }
-
-unsafe impl Plain for IpcacheKey {}
