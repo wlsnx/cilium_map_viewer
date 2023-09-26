@@ -1,6 +1,6 @@
 [package]
 name = "cilium_map_viewer"
-version = "0.1.2"
+version = "0.2.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -9,12 +9,14 @@ edition = "2021"
 anyhow = "1.0.72"
 bitflags = { version = "2.3.3" }
 crossterm = "0.26.1"
+itertools = "0.11.0"
 lazy_static = "1.4.0"
 libbpf-rs = "0.21.1"
 libbpf-sys = "1.2.1"
 plain = "0.2.3"
 ratatui = "0.22.0"
 regex = "1.9.1"
+sysinfo = "0.29.10"
 tuitable = { path = "./tuitable" }
 tuitable_derive = { path = "./tuitable_derive" }
 

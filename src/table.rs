@@ -1,10 +1,13 @@
 use crate::*;
 use anyhow::Result;
 use crossterm::event::{self, Event, KeyCode, KeyEventKind, KeyModifiers};
+use itertools::Itertools;
 use lazy_static::lazy_static;
-use libbpf_rs::{query::MapInfoIter, MapHandle, MapType};
+use libbpf_rs::MapHandle;
 use ratatui::{prelude::*, widgets::*};
 use regex::Regex;
+use std::path::PathBuf;
+use sysinfo::{ProcessExt, ProcessRefreshKind, RefreshKind, System, SystemExt};
 
 pub fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> Result<()> {
     app.list()?;
@@ -21,8 +24,8 @@ pub fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> Result<(
                     (KeyCode::Char('k'), KeyModifiers::CONTROL) => app.previous_row(),
                     (KeyCode::Char('l'), KeyModifiers::NONE) => {
                         if let Some(selected_map) = app.list_state.selected() {
-                            let (_, id) = app.maps[selected_map];
-                            app.get(id)?;
+                            // let (_, path) = &app.maps[selected_map];
+                            app.get(selected_map)?;
                             app.content_state.select(None);
                         }
                     }
@@ -36,17 +39,18 @@ pub fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> Result<(
 
 lazy_static! {
     static ref MAP_FILTER: Regex = Regex::new(
-        "cilium_(policy_\
-                |tunnel_m\
-                |ct4_glob\
-                |metrics\
-                |ct_any4_\
-                |lb4_reve\
-                |lb4_serv\
-                |lb4_back\
-                |snat_v4_\
-                |lxc\
-                |ipcache)"
+        "^(policy\
+         |tunnel map\
+         |ct4 global\
+         |metrics\
+         |ct any4 global\
+         |lb4 reverse nat\
+         |lb4 reverse sk\
+         |lb4 services v2\
+         |lb4 backends v3\
+         |snat v4 external\
+         |lxc\
+         |ipcache)"
     )
     .unwrap();
 }
@@ -55,7 +59,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     let name_len = app
         .maps
         .iter()
-        .map(|(name, _)| name.len() - 7)
+        .map(|(name, _)| name.len())
         .max()
         .unwrap_or(0);
     let rects = Layout::default()
@@ -103,7 +107,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     let map_names: Vec<_> = app
         .maps
         .iter()
-        .map(|map| ListItem::new(&map.0[7..]))
+        .map(|map| ListItem::new(&map.0[..]))
         .collect();
     let maps = List::new(map_names)
         .block(
@@ -122,7 +126,7 @@ pub struct App {
     rows: Vec<Vec<String>>,
     header: Vec<&'static str>,
     name: String,
-    maps: Vec<(String, u32)>,
+    maps: Vec<(String, PathBuf)>,
 }
 
 impl App {
@@ -182,43 +186,58 @@ impl App {
         self.list_state.select(Some(i));
     }
 
-    pub fn get(&mut self, id: u32) -> Result<()> {
-        let map = MapHandle::from_map_id(id)?;
-        let (rows, header) = match map.name() {
-            "cilium_policy_0" => dump::<PolicyKey, PolicyEntry>(&map, false)?,
-            "cilium_ipcache" => dump::<IpcacheKey, RemoteEndpointInfo>(&map, false)?,
-            "cilium_metrics" => dump::<MetricsKey, MetricsValue>(&map, true)?,
-            "cilium_tunnel_m" => dump::<TunnelKey, TunnelValue>(&map, false)?,
-            "cilium_ct4_glob" | "cilium_ct_any4_" => dump::<Ipv4CtTuple, CtEntry>(&map, false)?,
-            "cilium_lb4_reve" => {
-                if map.map_type() == MapType::Hash {
-                    dump::<Lb4ReverseNatKey, Lb4ReverseNat>(&map, false)?
-                } else {
-                    dump::<Ipv4RevnatTuple, Ipv4RevnatEntry>(&map, false)?
-                }
-            }
-            "cilium_lb4_serv" => dump::<Lb4Key, Lb4Service>(&map, false)?,
-            "cilium_snat_v4_" => dump::<Ipv4CtTuple, Ipv4NatEntry>(&map, false)?,
-            "cilium_lb4_back" => dump::<Lb4BackendKey, Lb4Backend>(&map, false)?,
-            "cilium_lxc" => dump::<EndpointKey, EndpointInfo>(&map, false)?,
+    pub fn get(&mut self, selected_map: usize) -> Result<()> {
+        // let map = MapHandle::from_map_id(id)?;
+        let (name, path) = &self.maps[selected_map];
+        let map = MapHandle::from_pinned_path(path)?;
+        let (rows, header) = match name.as_str() {
+            "ipcache" => dump::<IpcacheKey, RemoteEndpointInfo>(&map, false)?,
+            "metrics" => dump::<MetricsKey, MetricsValue>(&map, true)?,
+            "tunnel map" => dump::<TunnelKey, TunnelValue>(&map, false)?,
+            "ct4 global" | "ct any4 global" => dump::<Ipv4CtTuple, CtEntry>(&map, false)?,
+            "lb4 reverse nat" => dump::<Lb4ReverseNatKey, Lb4ReverseNat>(&map, false)?,
+            "lb4 reverse sk" => dump::<Ipv4RevnatTuple, Ipv4RevnatEntry>(&map, false)?,
+            "lb4 services v2" => dump::<Lb4Key, Lb4Service>(&map, false)?,
+            "snat v4 external" => dump::<Ipv4CtTuple, Ipv4NatEntry>(&map, false)?,
+            "lb4 backends v3" => dump::<Lb4BackendKey, Lb4Backend>(&map, false)?,
+            "lxc" => dump::<EndpointKey, EndpointInfo>(&map, false)?,
             _ => {
-                self.rows.clear();
-                self.header.clear();
-                self.name = "Not supported".to_string();
-                return Ok(());
+                if name.starts_with("policy") {
+                    dump::<PolicyKey, PolicyEntry>(&map, false)?
+                } else {
+                    self.rows.clear();
+                    self.header.clear();
+                    self.name = "Not supported".to_string();
+                    return Ok(());
+                }
             }
         };
         self.rows = rows;
         self.header = header;
-        self.name = map.name().to_string();
+        self.name = name.to_owned();
         Ok(())
     }
 
     pub fn list(&mut self) -> Result<()> {
-        let map_info_iter = MapInfoIter::default();
-        self.maps = map_info_iter
-            .filter(|info| MAP_FILTER.is_match(&info.name))
-            .map(|info| (info.name, info.id))
+        let system = System::new_with_specifics(
+            RefreshKind::new().with_processes(ProcessRefreshKind::new()),
+        );
+        let cilium_agent = system.processes_by_name("cilium-agent");
+        self.maps = cilium_agent
+            .flat_map(|process| {
+                let bpf_path = format!("/proc/{}/root/sys/fs/bpf/tc/globals", process.pid());
+                std::fs::read_dir(bpf_path)
+                    .unwrap()
+                    .map(|entry| {
+                        let dir = entry.unwrap();
+                        (
+                            dir.file_name().to_string_lossy().to_string()[7..].replace('_', " "),
+                            dir.path(),
+                        )
+                    })
+                    .filter(|(name, _)| MAP_FILTER.is_match(name))
+            })
+            .sorted()
             .collect();
         Ok(())
     }

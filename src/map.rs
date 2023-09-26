@@ -1,11 +1,11 @@
-use anyhow::{Context, Result};
+use anyhow::{Result};
 use libbpf_rs::MapFlags;
-use libbpf_rs::{query::MapInfo, Map, MapHandle};
-use libbpf_sys;
+use libbpf_rs::{MapHandle};
+
 use plain::Plain;
 use std::mem::size_of;
-use std::os::fd::{AsFd, AsRawFd};
-use std::ptr;
+
+
 use tuitable::TuiTable;
 
 pub fn dump<K, V>(map: &MapHandle, percpu: bool) -> Result<(Vec<Vec<String>>, Vec<&'static str>)>
@@ -41,7 +41,7 @@ where
             row.push("│".to_string());
             value.extend(vec![0; size_of::<V>().saturating_sub(value.len())]);
             let mut v = V::default();
-            v.copy_from_bytes(&value).unwrap();
+            v.copy_from_bytes(value).unwrap();
             row.extend(v.row());
             rows.push(row);
         }
